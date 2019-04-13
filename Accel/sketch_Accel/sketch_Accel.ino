@@ -1,9 +1,78 @@
-void setup() {
-  // put your setup code here, to run once:
+/*
+ * Copyright (c) 2016 Intel Corporation.  All rights reserved.
+ * See the bottom of this file for the license terms.
+ */
 
+/*
+   This sketch example demonstrates how the BMI160 on the
+   Intel(R) Curie(TM) module can be used to read accelerometer data
+*/
+
+#include "CurieIMU.h"
+
+bool is_up = false;   // boolean to see if the hand is up or down
+int strum_index = 0;
+float strum_buf[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+
+void setup() {
+  Serial.begin(9600); // initialize Serial communication
+  while (!Serial);    // wait for the serial port to open
+
+  // initialize device
+  Serial.println("Initializing IMU device...");
+  CurieIMU.begin();
+
+  // Set the accelerometer range to 2G
+  CurieIMU.setAccelerometerRange(2);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  float ax, ay, az;  //scaled accelerometer values
 
+  // read accelerometer measurements from device, scaled to the configured range
+  CurieIMU.readAccelerometerScaled(ax, ay, az);
+
+  strum_buf[((strum_index) % 5)] = ax;
+
+  if(is_up && ax < 0)
+  {
+    is_up = false;
+  } 
+  else if(!is_up && ax > 0)
+  {
+    is_up = true;
+  }
+
+  if(((ax > 0.7) && (strum_buf[((strum_index + 1) % 5)] < -0.7)) || 
+      ((ax < -0.7) && (strum_buf[((strum_index + 1) % 5)] > 0.7)))
+  {
+    Serial.println("Star power!");
+  }
+
+  Serial.println(ax);
+  
+  strum_index = (strum_index + 1) % 5;
+
+  delay(50);
+
+  //Serial.write(buf, 8);
 }
+
+/*
+   Copyright (c) 2016 Intel Corporation.  All rights reserved.
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+*/
