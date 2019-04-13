@@ -2,6 +2,8 @@
  * Random Key/Random Delay
  */
 const int index_finger = 0;
+const int middle_finger = 1;
+const int ring_finger = 2;
 const int lower_avg = 15;
 
 int resistor_reading; 
@@ -20,20 +22,21 @@ void setup()
 void loop() 
 {
   resistor_reading = analogRead(index_finger);
-  resistor_two = analogRead(1);
-  resistor_three = analogRead(2);
+  resistor_two = analogRead(middle_finger);
+  resistor_three = analogRead(ring_finger);
   delay(20);
-dddd  if (resistor_reading < lower_avg) {
-    buf[3] = 4;    // Random character
+  if (resistor_reading < lower_avg) {
+    buf[3] = 4;    // A, green key
   }
   if(resistor_two < lower_avg) {
-    buf[2] = 0x16; // S
+    buf[2] = 0x16; // S, Red key
   }
   if(resistor_three < lower_avg) {
-    buf[4] = 7; // S
+    buf[4] = 7; // D, Yellow Key
   }
   Serial.write(buf, 8); // Send keypress
 
+  // Only release key if we go back above the threshold
   if(resistor_reading >= lower_avg) {
     releaseKey(3);
   }
@@ -45,6 +48,7 @@ dddd  if (resistor_reading < lower_avg) {
   }
 }
 
+// writes 0 to the approiate buffer
 void releaseKey(int finger) 
 {
   buf[finger] = 0;
