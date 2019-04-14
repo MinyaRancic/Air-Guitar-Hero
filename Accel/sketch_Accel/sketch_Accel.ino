@@ -12,7 +12,7 @@ void setup() {
   Serial.begin(9600); // initialize Serial communication
   while (!Serial);    // wait for the serial port to open
 
-  for (i=0; i < buffer_len; i++)
+  for (int i=0; i < buffer_len; i++)
   {
     strum_buf[i] = 0.0;
   }
