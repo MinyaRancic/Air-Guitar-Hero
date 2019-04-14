@@ -37,25 +37,26 @@ void loop() {
   if(is_up && ax < 0)
   {
     is_up = false;
+    // Send strum input
   } 
   else if(!is_up && ax > 0)
   {
     is_up = true;
+    // Send strum input
   }
 
   if(((ax > 0.7) && (strum_buf[((strum_index + 1) % 5)] < -0.7)) || 
       ((ax < -0.7) && (strum_buf[((strum_index + 1) % 5)] > 0.7)))
   {
-    Serial.println("Star power!");
+    // Send star power input
   }
 
-  Serial.println(ax);
+  // Serial.println(ax);
   
   strum_index = (strum_index + 1) % 5;
 
   delay(50);
 
-  //Serial.write(buf, 8);
 }
 
 /*
