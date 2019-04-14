@@ -13,7 +13,7 @@ const int pinky_finger = 3;
 const int strum = 12;
 const int star = 13;
 const int lower_avg = 13;
-const int strum_const = 19;
+const int strum_const = 9;
 
 int resistor_index; 
 int resistor_middle;
@@ -23,6 +23,7 @@ int strumVal;
 int starVal;
 bool upstrum;
 bool downstrum;
+bool noAccel;
 
 sensors_event_t event;
 Adafruit_MMA8451 mma;
@@ -35,20 +36,21 @@ void setup()
   upstrum = false;
   downstrum = false;
   Serial.begin(9600);
-  pinMode(strum, INPUT);
-  delay(100);
   mma = Adafruit_MMA8451();
-  delay(1000);
+//  delay(1000);
 
   pinMode(11, OUTPUT);
   
-    if (! mma.begin()) {
+  if (! mma.begin()) {
+//  if (true) {
     Serial.println("Couldnt start");
-    while (1);
+    noAccel = true;
   }
+  else {
   Serial.println("MMA8451 found!");
-  
+  noAccel = false;
   mma.setRange(MMA8451_RANGE_2_G);
+  }
 }
 
 void loop() 
@@ -57,8 +59,9 @@ void loop()
   resistor_middle = analogRead(middle_finger);
   resistor_ring = analogRead(ring_finger);
   resistor_pinky = analogRead(pinky_finger);
-  mma.getEvent(&event);
-  
+  if(!noAccel) {
+    mma.getEvent(&event);
+  }
   delay(20);
   if (resistor_index < lower_avg) {
     buf[3] = 4;    // A, green key
@@ -69,13 +72,12 @@ void loop()
   if(resistor_ring < lower_avg) {
     buf[4] = 7; // D, Yellow Key
   }
-  if(resistor_pinky < lower_avg - 1) {
+  if(resistor_pinky < lower_avg +1) {
     buf[5] = 9; // F, Blue Key
   }
-  if(!downstrum && (event.acceleration.y > strum_const || event.acceleration.y <= -1*strum_const) ) {
+  if(!noAccel && !downstrum && (event.acceleration.y > strum_const || event.acceleration.y <= -1*strum_const) ) {
     buf[6] = 0x0f; //l, strum
     downstrum = true;
-    Serial.println("strum");
   } 
   
   
@@ -95,7 +97,7 @@ void loop()
   if(resistor_pinky >= lower_avg) {
     releaseKey(5);
   }
-  if(downstrum && (event.acceleration.y <= strum_const && event.acceleration.y >= -1*strum_const) ) {
+  if(!noAccel && (event.acceleration.y <= strum_const && event.acceleration.y >= -1*strum_const ) ) {
     releaseKey(6);
     downstrum = false;
   }
